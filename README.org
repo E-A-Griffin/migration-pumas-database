@@ -4,7 +4,7 @@ PostgreSQL database for storing PUMA and migPUMA information. More information a
 PostgreSQL 10.19 (Ubuntu 10.19-0ubuntu0.18.04.1)
 * Database creation & initialization
 Converting the CSV files provided by https://www.census.gov/programs-surveys/acs/microdata/access.html into the format ultimately used by this PostgreSQL database involves multiple steps of data preprocessing and transformation. The current iteration of this database is based on the five year individual dataset from years 2015-2019, though this dataset aims to be dynamic in its capacity to be expanded to future releases of individual data. This database is a continuation of the initial work done in https://github.com/qiang-yi/PUMS_migration, thus this Python preprocessing is utilized as an initial step in converting the CSVs to SQL. For convenience, the Python code used
-* Semantics of database columns
+* Semantics of database attributes
 Columns of the tables in the database are based mostly on https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2015-2019.pdf. Column names are made to closely resemble their original names in this data dictionary, where applicable. There are general tendencies for converting between the ranges of the values present in the original columns of the CSVs and the respective attributes in the associated SQL tables, for example, boolean/predicate columns in the data dictionary are represented by
 #+BEGIN_EXAMPLE
 b N/A
@@ -12,8 +12,11 @@ b N/A
 2 No
 #+END_EXAMPLE
 such that
-#+BEGIN_SRC Ruby
+# turns out haskell syntax highlighting looks pretty good for this little
+# mapping example
+#+BEGIN_SRC haskell
 b => NULL
 1 => true
 2 => false
 #+END_SRC
+This is more inline with SQL data types, especially given SQL's support for ternary boolean logic (a bool b in SQL is either true, false, or NULL). This change allows for space and time complexity optimizations over using a numeric type to represent these values.
