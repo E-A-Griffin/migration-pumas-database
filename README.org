@@ -1,0 +1,4 @@
+# README
+PostgreSQL database for storing PUMA and migPUMA information.
+* PostgreSQL version
+PostgreSQL 10.19 (Ubuntu 10.19-0ubuntu0.18.04.1)
