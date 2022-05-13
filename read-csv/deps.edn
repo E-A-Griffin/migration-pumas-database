@@ -1,0 +1,11 @@
+{:paths ["src" "resources" "target"]
+ :deps {org.clojure/clojure {:mvn/version"1.10.3"}
+        org.clojure/clojurescript {:mvn/version "1.10.866"}
+        org.clojure/data.csv {:mvn/version "1.0.1"}
+        org.clojure/spec.alpha {:mvn/version "0.1.143"}}
+ :aliases {:uberjar
+           {:extra-deps {com.github.seancorfield/depstar {:mvn/version "2.1.303"}}
+            :exec-fn hf.depstar/uberjar
+            :exec-args {:jar "target/uberjar/reformat-csv.jar"
+                        :aot true
+                        :main-class read-csv.core}}}}
