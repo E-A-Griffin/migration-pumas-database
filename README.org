@@ -1,5 +1,5 @@
-# README
-* Migration PUMAs Database
+#+TITLE: Migration PUMAs Database
+#+AUTHOR: Emma Griffin
 PostgreSQL database for storing PUMA and migPUMA information. More information about the underlying data can be found at https://www.census.gov/programs-surveys/acs/microdata/documentation.html. This current iteration of the database is based on the 5-year dataset between 2015-2019 conducted from the American Community Survey (ACS) Public Use Microdata Sample (PUMS) https://www2.census.gov/programs-surveys/acs/data/pums/2019/5-Year/. Specifically this dataset includes the person records for all fifty states, Washington D.C., and Puerto Rico.
 * PostgreSQL version
 PostgreSQL 10.19 (Ubuntu 10.19-0ubuntu0.18.04.1)
@@ -15,6 +15,13 @@ Most of the dependencies for the project are only needed if one wants to build t
 - ~PostgreSQL (tested on 10.19)~
 - ~psql (tested on 10.19)~
 ** Build from release
+- ~PostgreSQL (tested on 10.19)~
+- ~psql (tested on 10.19)~
+** Add new survey years
+- ~UNIX/Linux (tested on Ubuntu 18.04)~
+  + ~sed (tested on 4.4)~
+- ~Clojure (tested on 1.10.1) or JRE (tested on OpenJDK Runtime Environment (build 11.0.15+10-Ubuntu-0ubuntu0.18.04.1)~
+- ~Python (tested on 3.6.9)~
 - ~PostgreSQL (tested on 10.19)~
 - ~psql (tested on 10.19)~
 * Database creation & initialization
@@ -47,7 +54,7 @@ This is more inline with SQL data types, especially given SQL's support for tern
 * Future work
 Given the Census' record of changing pumas in accordance with the census conducted each ten years (as they have in 2000 and 2010). Inclusion of future years' data may require reworking queries and the database itself, rather than simply being able to preprocess the data using the included scripts and then inserting the resultant CSV files into the existing database. This should be possible for expanding the database to include data from previous years, such as the 2010-2014 five year dataset not currently included.
 ** Discrepancies between survey years
-One important note when considering adding future or previous years to the database is the change in names from the data dictionary codes to longer names that are easier to read and immediately understand. A downside of this design decision is that when importing a CSV provided by the Census Bureau, there likely is a change in the attributes/columns from the 2015-2019 dataset to whatever year(s) are being added. There could also be changes when switching between 5 year and 1 year dataset, unfortunately, any remedy to this issue involves, at best, a semi-automated removing or padding of attributes to conform to the existent database schema. For example, when attempting to add the 1 year 2020 dataset, the new attribute ``HIMRKS'' appears, which represents ``Subsidized Marketplace Coverage''. If one does not want to update the columns of the underlying database, then the solution is to simply remove this attribute from the CSV altogether. A script has been provided to do so automatically, i.e. a program that takes in a list of command line arguments and removes each column matching the attribute name of each argument.
+One important note when considering adding future or previous years to the database is the change in names from the data dictionary codes to longer names that are easier to read and immediately understand. A downside of this design decision is that when importing a CSV provided by the Census Bureau, there likely is a change in the attributes/columns from the 2015-2019 dataset to whatever year(s) are being added. There could also be changes when switching between 5 year and 1 year dataset, unfortunately, any remedy to this issue involves, at best, a semi-automated removing or padding of attributes to conform to the existent database schema. For example, when attempting to add the 1 year 2020 dataset, the new attribute ``HIMRKS'' appears, which represents ``Subsidized Marketplace Coverage''. If one does not want to update the columns of the underlying database, then the solution is to simply remove this attribute from the CSV altogether. A script ~preprocess-new-file.sh~ has been provided to do so automatically, i.e. a program that takes in a list of command line arguments and removes each column matching the attribute name of each argument.
 ** Data Dictionary -> Database Column Names
 The following data structure shows the mapping from the 2015-2019 ACS PUMS Data Dictionary codes to their respective column names in the database. The hash map shown is also available in ~data_mapping.edn~.
 #+BEGIN_SRC clojure
@@ -347,3 +354,10 @@ The following data structure shows the mapping from the 2015-2019 ACS PUMS Data 
  :PWGTP79   "person_weight_replicate_79"
  :PWGTP80   "person_weight_replicate_80"}
 #+END_SRC
+** Example: adding 1 year 2020 data to database
+~path-to-2020-data.csv~ refers to the path where the CSV containing the 1 year 2020 CSV is located and ~path-to-output.csv~ refers to the path where the final output file will be written to.
+#+BEGIN_SRC bash
+./preprocess-new-file.sh path-to-2020-data.csv path-to-output.csv
+#+END_SRC
+*** Potential considerations
+The bash file included ~preprocess-new-file.sh~ has ~#!/usr/bin/env bash~ and the python file included ~add-migration-attrs.py~ has ~#!/usr/bin/python3~ specified as the paths for ~bash~ and ~python3~, respectively, if these programs are installed in another location then you will need to edit the top lines in these files' source codes to point to the correct paths for your setup.
