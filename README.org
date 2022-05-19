@@ -4,7 +4,7 @@ PostgreSQL database for storing PUMA and migPUMA information. More information a
 * PostgreSQL version
 PostgreSQL 10.19 (Ubuntu 10.19-0ubuntu0.18.04.1)
 * Dependencies
-Most of the dependencies for the project are only needed if one wants to build the database from scratch.
+Most of the dependencies for the project are only needed if one wants to build the database from scratch or add new survey years to the database.
 ** Build from scratch
 - ~UNIX/Linux (tested on Ubuntu 18.04)~
   + ~sed (tested on 4.4)~
@@ -26,7 +26,7 @@ Most of the dependencies for the project are only needed if one wants to build t
 - ~psql (tested on 10.19)~
 * Database creation & initialization
 ** Overview
-Converting the CSV files provided by https://www.census.gov/programs-surveys/acs/microdata/access.html into the format ultimately used by this PostgreSQL database involves multiple steps of data preprocessing and transformation. The current iteration of this database is based on the five year individual dataset from years 2015-2019, though this dataset aims to be dynamic in its capacity to be expanded to future releases of individual data. This database is a continuation of the initial work done in https://github.com/qiang-yi/PUMS_migration, thus this Python preprocessing is utilized as an initial step in converting the CSVs to SQL. For convenience, the Python code used from this repository is included locally, given collaboration with the original authors of this repository.
+Converting the CSV files provided by https://www.census.gov/programs-surveys/acs/microdata/access.html into the format ultimately used by this PostgreSQL database involves multiple steps of data preprocessing and transformation. The current iteration of this database is based on the five year individual dataset from years 2015-2019, though this dataset aims to be dynamic in its capacity to be expanded to future releases of individual data. This database is a continuation of the initial work done in https://github.com/qiang-yi/PUMS_migration, thus this Python preprocessing is utilized as an initial step in converting the CSVs to SQL. For convenience, a modified version of the Python code used from this repository is included locally, given collaboration with the original authors of this repository.
 ** Build from scratch
 *** Database creation
 *** Database initialization
@@ -35,6 +35,11 @@ The easiest way to get the database up and running is via the included release. 
 #+BEGIN_SRC bash
 psql -d pumsdb -f pumsdb-dump
 #+END_SRC
+You may receive some errors resembling
+#+BEGIN_SRC bash
+ERROR:   role "emma_audrey" does not exist
+#+END_SRC
+near the end of running ~psql -d pumsdb -f pumsdb-dump~, these can be ignored, they likely arose from changing permissions on the original database the dump is based on.
 * Semantics of database attributes
 Columns of the tables in the database are based mostly on https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2015-2019.pdf. Column names are made to closely resemble their original names in this data dictionary, where applicable. There are general tendencies for converting between the ranges of the values present in the original columns of the CSVs and the respective attributes in the associated SQL tables, for example, boolean/predicate columns in the data dictionary are represented by
 #+BEGIN_EXAMPLE
@@ -361,3 +366,5 @@ The following data structure shows the mapping from the 2015-2019 ACS PUMS Data 
 #+END_SRC
 *** Potential considerations
 The bash file included ~preprocess-new-file.sh~ has ~#!/usr/bin/env bash~ and the python file included ~add-migration-attrs.py~ has ~#!/usr/bin/python3~ specified as the paths for ~bash~ and ~python3~, respectively, if these programs are installed in another location then you will need to edit the top lines in these files' source codes to point to the correct paths for your setup.
+
+Another thing to be aware of is the size of the input CSV files. Even a single survey year could be large enough that the Python script may run out of memory on certain systems. If you encounter these issues, then run the script for each state, obviously this isn't ideal to be done manually but writing a script to iterate through each state's CSV file should be simple to implement if needed.
